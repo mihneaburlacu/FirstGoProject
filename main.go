@@ -8,6 +8,14 @@ import (
 )
 
 func main() {
+	newData, err2 := filesio.ReturnData("test.csv")
+
+	if err2 != nil {
+		fmt.Println("Error")
+	}
+
+	fmt.Println(newData)
+
 	fmt.Println("Start project")
 	fmt.Println()
 
