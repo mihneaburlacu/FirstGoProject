@@ -1,6 +1,7 @@
 package parsercsv
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -44,5 +45,48 @@ func TestShowAllDetails(t *testing.T) {
 
 	if got != want {
 		t.Errorf("got %s, wanted %s", got, want)
+	}
+}
+
+func TestParser(t *testing.T) {
+	var data [][]string
+	data = append(data, []string{"id", "first_name", "last_name", "email", "gender", "ip_address"})
+	data = append(data, []string{"1", "Mavra", "Malec", "mmalec0@usa.gov", "Female", "229.215.245.102"})
+	data = append(data, []string{"2", "Fan", "Gilvear", "fgilvear1@people.com.cn", "Female", "125.219.253.132"})
+	data = append(data, []string{"3", "Gerri", "Choffin", "gchoffin2@ning.com", "", "9.254.198.50"})
+	data = append(data, []string{"4", "Tremayne", "Loosemore", "tloosemore3@cnn.com", "Male", "167.249.115.222"})
+
+	var want [][]PersonalDetailsRecord
+	var oneChunkOfPersonalDetails []PersonalDetailsRecord
+	var onePerson PersonalDetailsRecord
+	Load(&onePerson, []string{"1", "Mavra", "Malec", "mmalec0@usa.gov", "Female", "229.215.245.102"})
+	oneChunkOfPersonalDetails = append(oneChunkOfPersonalDetails, onePerson)
+	Load(&onePerson, []string{"2", "Fan", "Gilvear", "fgilvear1@people.com.cn", "Female", "125.219.253.132"})
+	oneChunkOfPersonalDetails = append(oneChunkOfPersonalDetails, onePerson)
+	want = append(want, oneChunkOfPersonalDetails)
+	oneChunkOfPersonalDetails = nil
+	Load(&onePerson, []string{"4", "Tremayne", "Loosemore", "tloosemore3@cnn.com", "Male", "167.249.115.222"})
+	oneChunkOfPersonalDetails = append(oneChunkOfPersonalDetails, onePerson)
+	want = append(want, oneChunkOfPersonalDetails)
+
+	got := Parser(data, 2)
+
+	if len(got) != len(want) {
+		t.Errorf("The length does not match")
+	}
+
+	theyAreEquals := true
+	for i, oneChunk := range want {
+		for j, _ := range oneChunk {
+			if got[i][j] != want[i][j] {
+				fmt.Println(got[i][j])
+				fmt.Println(want[i][j])
+				theyAreEquals = false
+			}
+		}
+	}
+
+	if theyAreEquals == false {
+		t.Errorf("they are not equal")
 	}
 }
