@@ -43,9 +43,10 @@ func TestWriteFiles(t *testing.T) {
 
 	allPersonalDetails = append(allPersonalDetails, oneChunkOfPersonalDetails)
 
-	WriteFiles(allPersonalDetails)
+	got, err := WriteFiles(allPersonalDetails)
+	want := "id,first_name,last_name,email,gender,ip_address\n1 Mavra Malec mmalec0@usa.gov Female 229.215.245.102\n2 Alex Malec mmalec0@usa.gov Female 229.215.245.102"
 
-	if true == false {
-		t.Errorf("They are not equal")
+	if got[0] != want && err != nil {
+		t.Errorf("got %s, wanted %s", got, want)
 	}
 }

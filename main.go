@@ -8,14 +8,6 @@ import (
 )
 
 func main() {
-	newData, err2 := filesio.ReturnData("test.csv")
-
-	if err2 != nil {
-		fmt.Println("Error")
-	}
-
-	fmt.Println(newData)
-
 	fmt.Println("Start project")
 	fmt.Println()
 
@@ -33,7 +25,7 @@ func main() {
 	fmt.Println()
 
 	allPersonalDetails := parsercsv.Parser(data, nrOfChunks)
-	err = filesio.WriteFiles(allPersonalDetails)
+	_, err = filesio.WriteFiles(allPersonalDetails)
 
 	if err != nil {
 		fmt.Println("Error writing data in file")

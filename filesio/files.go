@@ -34,8 +34,10 @@ func ReturnData(fileName string) ([][]string, error) {
 	return data, err
 }
 
-func WriteFiles(allPersonalDetails [][]parsercsv.PersonalDetailsRecord) error {
+func WriteFiles(allPersonalDetails [][]parsercsv.PersonalDetailsRecord) ([]string, error) {
 	var errToReturn error
+	var allOutputText []string
+
 	for i, chunk := range allPersonalDetails {
 		fileOutputName := "output" + strconv.Itoa(i) + ".txt"
 		fileOut, err := os.Create(fileOutputName)
@@ -43,17 +45,15 @@ func WriteFiles(allPersonalDetails [][]parsercsv.PersonalDetailsRecord) error {
 		if err != nil {
 			errToReturn = err
 			fmt.Println("Error creating the output file " + strconv.Itoa(i))
-			return err
+			return allOutputText, err
 		}
-
-		defer fileOut.Close()
 
 		_, err = fileOut.WriteString("id,first_name,last_name,email,gender,ip_address\n")
 
 		if err != nil {
 			errToReturn = err
 			fmt.Println("Error writing in file " + strconv.Itoa(i))
-			return err
+			return allOutputText, err
 		}
 
 		var text string
@@ -67,20 +67,21 @@ func WriteFiles(allPersonalDetails [][]parsercsv.PersonalDetailsRecord) error {
 		fmt.Println()
 
 		_, err = fileOut.WriteString(text)
+		allOutputText = append(allOutputText, "id,first_name,last_name,email,gender,ip_address\n"+text)
 
 		if err != nil {
 			errToReturn = err
 			fmt.Println("Error writing in file " + strconv.Itoa(i))
-			return err
+			return allOutputText, err
 		}
 
 		err = fileOut.Close()
 		if err != nil {
 			errToReturn = err
 			fmt.Println("Error closing the output file " + strconv.Itoa(i))
-			return err
+			return allOutputText, err
 		}
 	}
 
-	return errToReturn
+	return allOutputText, errToReturn
 }

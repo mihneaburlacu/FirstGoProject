@@ -1,4 +1,0 @@
-id,first_name,last_name,email,gender,ip_address
-1 Mavra Malec mmalec0@usa.gov Female 229.215.245.102
-2 Alex Malec mmalec0@usa.gov Female 229.215.245.102
-
