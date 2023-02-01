@@ -1,5 +1,9 @@
 package parsercsv
 
+import (
+	"reflect"
+)
+
 type PersonalDetailsRecord struct {
 	ID        string
 	FirstName string
@@ -15,12 +19,12 @@ func Validate(record PersonalDetailsRecord) bool {
 
 func Load(record *PersonalDetailsRecord, line []string) {
 	if len(line) == 6 {
-		*&record.ID = line[0]
-		*&record.FirstName = line[1]
-		*&record.LastName = line[2]
-		*&record.Email = line[3]
-		*&record.Gender = line[4]
-		*&record.IpAddress = line[5]
+		record.ID = line[0]
+		record.FirstName = line[1]
+		record.LastName = line[2]
+		record.Email = line[3]
+		record.Gender = line[4]
+		record.IpAddress = line[5]
 	}
 }
 
@@ -35,7 +39,7 @@ func Parser(data [][]string, nrOfChunks int) [][]PersonalDetailsRecord {
 	var chunkOfPersonalDetails []PersonalDetailsRecord
 
 	for i, line := range data {
-		if i > 0 {
+		if !reflect.DeepEqual(line, []string{"id", "first_name", "last_name", "email", "gender", "ip_address"}) {
 			var onePerson PersonalDetailsRecord
 
 			Load(&onePerson, line)

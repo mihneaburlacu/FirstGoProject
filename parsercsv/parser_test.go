@@ -1,7 +1,7 @@
 package parsercsv
 
 import (
-	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -49,44 +49,112 @@ func TestShowAllDetails(t *testing.T) {
 }
 
 func TestParser(t *testing.T) {
-	var data [][]string
-	data = append(data, []string{"id", "first_name", "last_name", "email", "gender", "ip_address"})
-	data = append(data, []string{"1", "Mavra", "Malec", "mmalec0@usa.gov", "Female", "229.215.245.102"})
-	data = append(data, []string{"2", "Fan", "Gilvear", "fgilvear1@people.com.cn", "Female", "125.219.253.132"})
-	data = append(data, []string{"3", "Gerri", "Choffin", "gchoffin2@ning.com", "", "9.254.198.50"})
-	data = append(data, []string{"4", "Tremayne", "Loosemore", "tloosemore3@cnn.com", "Male", "167.249.115.222"})
-
-	var want [][]PersonalDetailsRecord
-	var oneChunkOfPersonalDetails []PersonalDetailsRecord
-	var onePerson PersonalDetailsRecord
-	Load(&onePerson, []string{"1", "Mavra", "Malec", "mmalec0@usa.gov", "Female", "229.215.245.102"})
-	oneChunkOfPersonalDetails = append(oneChunkOfPersonalDetails, onePerson)
-	Load(&onePerson, []string{"2", "Fan", "Gilvear", "fgilvear1@people.com.cn", "Female", "125.219.253.132"})
-	oneChunkOfPersonalDetails = append(oneChunkOfPersonalDetails, onePerson)
-	want = append(want, oneChunkOfPersonalDetails)
-	oneChunkOfPersonalDetails = nil
-	Load(&onePerson, []string{"4", "Tremayne", "Loosemore", "tloosemore3@cnn.com", "Male", "167.249.115.222"})
-	oneChunkOfPersonalDetails = append(oneChunkOfPersonalDetails, onePerson)
-	want = append(want, oneChunkOfPersonalDetails)
-
-	got := Parser(data, 2)
-
-	if len(got) != len(want) {
-		t.Errorf("The length does not match")
+	type testCases struct {
+		name  string
+		input [][]string
+		want  [][]PersonalDetailsRecord
 	}
 
-	theyAreEquals := true
-	for i, oneChunk := range want {
-		for j, _ := range oneChunk {
-			if got[i][j] != want[i][j] {
-				fmt.Println(got[i][j])
-				fmt.Println(want[i][j])
-				theyAreEquals = false
+	for _, scenario := range []testCases{
+		{
+			name:  "all chunks are ok",
+			input: [][]string{{"1", "Mavra", "Malec", "mmalec0@usa.gov", "Female", "229.215.245.102"}, {"2", "Fan", "Gilvear", "fgilvear1@people.com.cn", "Female", "125.219.253.132"}, {"3", "Gerri", "Choffin", "gchoffin2@ning.com", "Male", "9.254.198.50"}, {"4", "Tremayne", "Loosemore", "tloosemore3@cnn.com", "Male", "167.249.115.222"}},
+			want: [][]PersonalDetailsRecord{
+				{
+					PersonalDetailsRecord{
+						ID:        "1",
+						FirstName: "Mavra",
+						LastName:  "Malec",
+						Email:     "mmalec0@usa.gov",
+						Gender:    "Female",
+						IpAddress: "229.215.245.102",
+					},
+					PersonalDetailsRecord{
+						ID:        "2",
+						FirstName: "Fan",
+						LastName:  "Gilvear",
+						Email:     "fgilvear1@people.com.cn",
+						Gender:    "Female",
+						IpAddress: "125.219.253.132",
+					},
+				},
+				{
+					PersonalDetailsRecord{
+						ID:        "3",
+						FirstName: "Gerri",
+						LastName:  "Choffin",
+						Email:     "gchoffin2@ning.com",
+						Gender:    "Male",
+						IpAddress: "9.254.198.50",
+					},
+					PersonalDetailsRecord{
+						ID:        "4",
+						FirstName: "Tremayne",
+						LastName:  "Loosemore",
+						Email:     "tloosemore3@cnn.com",
+						Gender:    "Male",
+						IpAddress: "167.249.115.222",
+					},
+				},
+			},
+		},
+		{
+			name:  "one field is missing",
+			input: [][]string{{"1", "Mavra", "Malec", "mmalec0@usa.gov", "Female", "229.215.245.102"}, {"2", "Fan", "Gilvear", "fgilvear1@people.com.cn", "Female", "125.219.253.132"}, {"3", "Gerri", "Choffin", "gchoffin2@ning.com", "Male", "9.254.198.50"}, {"4", "Tremayne", "Loosemore", "tloosemore3@cnn.com", "167.249.115.222"}},
+			want: [][]PersonalDetailsRecord{
+				{
+					PersonalDetailsRecord{
+						ID:        "1",
+						FirstName: "Mavra",
+						LastName:  "Malec",
+						Email:     "mmalec0@usa.gov",
+						Gender:    "Female",
+						IpAddress: "229.215.245.102",
+					},
+					PersonalDetailsRecord{
+						ID:        "2",
+						FirstName: "Fan",
+						LastName:  "Gilvear",
+						Email:     "fgilvear1@people.com.cn",
+						Gender:    "Female",
+						IpAddress: "125.219.253.132",
+					},
+				},
+				{
+					PersonalDetailsRecord{
+						ID:        "3",
+						FirstName: "Gerri",
+						LastName:  "Choffin",
+						Email:     "gchoffin2@ning.com",
+						Gender:    "Male",
+						IpAddress: "9.254.198.50",
+					},
+				},
+			},
+		},
+		{
+			name:  "the input data has a header",
+			input: [][]string{{"id", "first_name", "last_name", "email", "gender", "ip_address"}, {"1", "Mavra", "Malec", "mmalec0@usa.gov", "Female", "229.215.245.102"}},
+			want: [][]PersonalDetailsRecord{
+				{
+					PersonalDetailsRecord{
+						ID:        "1",
+						FirstName: "Mavra",
+						LastName:  "Malec",
+						Email:     "mmalec0@usa.gov",
+						Gender:    "Female",
+						IpAddress: "229.215.245.102",
+					},
+				},
+			},
+		},
+	} {
+		t.Run(scenario.name, func(t *testing.T) {
+			got := Parser(scenario.input, 2)
+			if !reflect.DeepEqual(got, scenario.want) {
+				t.Errorf("got %v, wanted %v", got, scenario.want)
 			}
-		}
+		})
 	}
 
-	if theyAreEquals == false {
-		t.Errorf("they are not equal")
-	}
 }

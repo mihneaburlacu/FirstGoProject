@@ -25,8 +25,8 @@ func main() {
 	fmt.Println()
 
 	allPersonalDetails := parsercsv.Parser(data, nrOfChunks)
-	_, err = filesio.WriteFiles(allPersonalDetails)
 
+	_, err = filesio.WriteFiles(allPersonalDetails)
 	if err != nil {
 		fmt.Println("Error writing data in file")
 		return
